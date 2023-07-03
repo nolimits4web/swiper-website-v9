@@ -1,0 +1,729 @@
+import { MDXProvider } from '@mdx-js/react';
+import Heading from '@/components/Heading.js';
+import { WithSidebarLayout } from '@/layouts/WithSidebarLayout.js';
+export const meta = {
+  title: 'Swiper Element (WebComponent)',
+  carbon: true,
+};
+
+import Link from 'next/link';
+
+Swiper web components are available since Swiper version 9.
+
+Custom elements are <a href="https://caniuse.com/custom-elementsv1" target="_blank">supported in all major browsers</a> and by almost every <a href="https://custom-elements-everywhere.com/" target="_blank">framework</a>.
+
+## Installation
+
+There are few options on how to install Swiper Element into your project:
+
+### Install & Register from NPM
+
+We can install Swiper from NPM
+
+```
+$ npm install swiper
+```
+
+When you import Swiper custom elements from node modules, we need to manually register it. It should be done only once and it registers Swiper custom elements globally.
+
+```js
+// import function to register Swiper custom elements
+import { register } from 'swiper/element/bundle';
+// register Swiper custom elements
+register();
+```
+
+### Swiper Custom Elements from CDN
+
+You can also install it from CDN by directly adding it to the website with `<script>` tag:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-element-bundle.min.js"></script>
+```
+
+In this case, it will be automatically registered, no need to call `register()`
+
+## Usage
+
+After we install Swiper Element (via node modules and calling `register()` or by including a script tag), there are 2 web components (custom elements) available for usage:
+
+- `<swiper-container>` - main Swiper element where you define all parameters
+- `<swiper-slide>` - Swiper slide element
+
+```html
+<swiper-container>
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Parameters As Attributes
+
+All <Link href="/swiper-api#parameters">Swiper parameters</Link> are available in a form of `kebab-case` attributes on `<swiper-container>`, for example:
+
+```html
+<swiper-container slides-per-view="3" speed="500" loop="true" css-mode="true">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+All parameters that are passed as objects also can be passed as attributes in a form of `[key]-[subkey]="value"`.
+
+For example, such configuration:
+
+```js
+new Swiper('.swiper', {
+  slidesPerView: 3,
+  grid: {
+    rows: 3,
+  },
+  mousewheel: {
+    forceToAxis: true,
+  },
+});
+```
+
+should be passed in this way:
+
+```html
+<swiper-container
+  slides-per-view="3"
+  grid-rows="3"
+  mousewheel-force-to-axis="true"
+>
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Parameters As Props
+
+In some more complex cases when we have more complex parameters objects (like with breakpoints), we can pass all parameters as `HTMLElement` properties.
+
+Here, we need to add `init="false"` attribute to prevent Swiper from initialization until we pass all required parameters.
+
+```html
+<!-- Add init="false" -->
+<swiper-container init="false">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+<script>
+  // swiper element
+  const swiperEl = document.querySelector('swiper-container');
+
+  // swiper parameters
+  const swiperParams = {
+    slidesPerView: 1,
+    breakpoints: {
+      640: {
+        slidesPerView: 2,
+      },
+      1024: {
+        slidesPerView: 3,
+      },
+    },
+    on: {
+      init() {
+        // ...
+      },
+    },
+  };
+
+  // now we need to assign all parameters to Swiper element
+  Object.assign(swiperEl, swiperParams);
+
+  // and now initialize it
+  swiperEl.initialize();
+</script>
+```
+
+## Updating Parameters
+
+Swiper parameters can be updated by directly changing Swiper element attributes or `HTMLElement` properties (if it was initialized with props);
+
+```html
+<swiper-container slides-per-view="1">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+
+<button>Update</button>
+
+<script>
+  const swiperEl = document.querySelector('swiper-container');
+  const buttonEl = document.querySelector('button');
+
+  buttonEl.addEventListener('click', () => {
+    // if it was initialized with attributes
+    swiperEl.setAttribute('slides-per-view', '3');
+
+    // or if it was initialized with props
+    swiperEl.slidesPerView = 3;
+  });
+</script>
+```
+
+## Access To Swiper Instance
+
+Initialized Swiper instance is available as `swiper` prop of Swiper's `HTMLElement`:
+
+```html
+<swiper-container slides-per-view="1">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+
+<button>Slide Next</button>
+
+<script>
+  const swiperEl = document.querySelector('swiper-container');
+  const buttonEl = document.querySelector('button');
+
+  buttonEl.addEventListener('click', () => {
+    swiperEl.swiper.slideNext();
+  });
+</script>
+```
+
+## Events
+
+All <Link href="/swiper-api#events">Swiper events</Link> are available as native DOM events <b>but with lowercase names</b>. E.g. `slideChange` becomes `slidechange`.
+
+All event handler arguments are passed as array in `event.detail`:
+
+```html
+<swiper-container>
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+
+<script>
+  const swiperEl = document.querySelector('swiper-container');
+
+  swiperEl.addEventListener('progress', (event) => {
+    const [swiper, progress] = event.detail;
+  });
+
+  swiperEl.addEventListener('slidechange', (event) => {
+    console.log('slide changed');
+  });
+</script>
+```
+
+It is also possible to prefix emitted events names to prevent clashing with other libs or native events using `events-prefix` attribute/parameter:
+
+```html
+<swiper-container events-prefix="swiper-">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+
+<script>
+  const swiperEl = document.querySelector('swiper-container');
+
+  swiperEl.addEventListener('swiper-progress', (event) => {
+    const [swiper, progress] = event.detail;
+  });
+
+  swiperEl.addEventListener('swiper-slidechange', (event) => {
+    console.log('slide changed');
+  });
+</script>
+```
+
+## Pagination, Navigation, Scrollbar
+
+If you don't pass these modules elements in parameters (e.g. `scrollbar.el`, `pagination.el`), it will render them automatically, if module parameter is specified:
+
+```html
+<!-- enable navigation, pagination, scrollbar -->
+<swiper-container navigation="true" pagination="true" scrollbar="true">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Lazy
+
+If you use lazy loading images, it requires the lazy preloader element to be added to the each slide. `swiper-slide` component can do this automatically by adding `lazy="true"` attribute:
+
+```html
+<swiper-container>
+  <!-- lazy="true" attribute will automatically render the prelaoder element -->
+  <swiper-slide lazy="true">
+    <img src="..." loading="lazy" />
+  </swiper-slide>
+  <swiper-slide lazy="true">
+    <img src="..." loading="lazy" />
+  </swiper-slide>
+  <swiper-slide lazy="true">
+    <img src="..." loading="lazy" />
+  </swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Virtual Slides
+
+We have 2 options to use Virtual slides in Swiper web components.
+
+First option is to pass slides in `virtual.slides` array, but it will require to use element properties to initialize Swiper element:
+
+```html
+<swiper-container init="false"></swiper-container>
+<script>
+  // swiper element
+  const swiperEl = document.querySelector('swiper-container');
+
+  // swiper parameters
+  const swiperParams = {
+    virtual: {
+      // virtual slides
+      slides: ['Slide 1', 'Slide 2', 'Slide 3'],
+    },
+  };
+
+  // assign all parameters to Swiper element
+  Object.assign(swiperEl, swiperParams);
+
+  // and now initialize it
+  swiperEl.initialize();
+</script>
+```
+
+Since version 9, Swiper virtual slides can work with slides originally rendered in DOM. On initialize it will remove them from DOM, cache and then re-use the ones which are required:
+
+```html
+<!-- it is enough to add virtual="true" attribute -->
+<swiper-container virtual="true">
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Thumbs
+
+In version 9 `thumbs.swiper` parameter also accepts CSS Selector of the thumbs swiper. So to make both with Swiper elements we can use the following:
+
+```html
+<!-- main swiper, pass thumbs swiper as CSS selector -->
+<swiper-container thumbs-swiper=".my-thumbs"> ... </swiper-container>
+
+<!-- thumbs swiper -->
+<swiper-container class="my-thumbs"> ... </swiper-container>
+```
+
+## Controller
+
+Same as with Thumbs, Controller in version 9 also accepts CSS Selector:
+
+```html
+<swiper-container class="swiper-1" controller-control=".swiper-2">
+  ...
+</swiper-container>
+
+<swiper-container class="swiper-2" controller-control=".swiper-1">
+  ...
+</swiper-container>
+```
+
+## Injecting Styles
+
+Due to Swiper web components realisation, same styles are injected in two places:
+
+- global scope (will be added to document `<head>`)
+- shadow DOM
+
+If you need to add styles to shadow DOM scope, you can use `injectStyles` or `injectStylesUrls` parameters, e.g.:
+
+```html
+<swiper-container init="false"> ... </swiper-container>
+<script type="module">
+  import { register } from 'swiper/element/bundle';
+
+  register();
+
+  const swiperEl = document.querySelector('swiper-container');
+
+  const params = {
+    // array with CSS styles
+    injectStyles: [
+      `
+      :host(.red) .swiper-wrapper {
+        background-color: red;
+      }
+      `,
+    ],
+
+    // array with CSS urls
+    injectStylesUrls: ['path/to/one.css', 'path/to/two.css'],
+  };
+
+  Object.assign(swiperEl, params);
+
+  swiperEl.initialize();
+</script>
+```
+
+If your environment (content security policy) doesn't allow injecting styles to document, you can disable default styles injection by passing `false` to `register` function:
+
+```html
+<!-- add styles as usual -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-element-bundle.min.css"
+/>
+
+<swiper-container init="false"> ... </swiper-container>
+
+<script type="module">
+  import { register } from 'swiper/element/bundle';
+
+  // pass false to prevent automatic styles injection
+  register(false);
+
+  const swiperEl = document.querySelector('swiper-container');
+
+  const params = {
+    // inject same style to shadow DOM
+    injectStylesUrls: [
+      'https://cdn.jsdelivr.net/npm/swiper@9/swiper-element-bundle.min.css',
+    ],
+  };
+
+  Object.assign(swiperEl, params);
+
+  swiperEl.initialize();
+</script>
+```
+
+## Core Version & Modules
+
+There is also Core version of Swiper element available (without additional modules).
+
+It can be imported from node modules:
+
+```js
+// import function to register Swiper Core custom elements
+import { register } from 'swiper/element';
+// register Swiper custom elements
+register();
+```
+
+To add modules, we need to use `modules` parameter as usual to inuclude modules scripts, and we also need to add modules styles globally and also inject modules styles to the shadow DOM
+
+```html
+<!-- add modules styles globally -->
+<link rel="stylesheet" href="path/to/navigation-element.min.css" />
+<link rel="stylesheet" href="path/to/pagination-element.min.css" />
+
+<swiper-container init="false"> ... </swiper-container>
+
+<script>
+  import { register } from 'swiper/element';
+  import { Navigation, Pagination } from 'swiper';
+
+  register();
+
+  const swiperEl = document.querySelector('swiper-container');
+
+  const params = {
+    modules: [Navigation, Pagination],
+    // inject modules styles to shadow DOM
+    injectStylesUrls: [
+      'path/to/navigation-element.min.css'
+      'path/to/pagination-element.min.css'
+    ]
+  };
+
+  Object.assign(swiperEl, params);
+
+  swiperEl.initialize();
+</script>
+```
+
+There are following element module styles imports available:
+
+- `swiper/element/css/a11y` - styles required for A11y module
+- `swiper/element/css/autoplay` - styles required for Autoplay module
+- `swiper/element/css/controller` - styles required for Controller module
+- `swiper/element/css/effect-cards` - styles required for Cards Effect module
+- `swiper/element/css/effect-coverflow` - styles required for Coverflow Effect module
+- `swiper/element/css/effect-creative` - styles required for Creative Effect module
+- `swiper/element/css/effect-cube` - styles required for Cube Effect module
+- `swiper/element/css/effect-fade` - styles required for Fade Effect module
+- `swiper/element/css/effect-flip` - styles required for Flip Effect module
+- `swiper/element/css/free-mode` - styles required for Free Mode module
+- `swiper/element/css/grid` - styles required for Grid module
+- `swiper/element/css/hash-navigation` - styles required for Hash Navigation module
+- `swiper/element/css/history` - styles required for History module
+- `swiper/element/css/keyboard` - styles required for Keyboard module
+- `swiper/element/css/manipulation` - styles required for Manipulation module
+- `swiper/element/css/mousewheel` - styles required for Mousewheel module
+- `swiper/element/css/navigation` - styles required for Navigation module
+- `swiper/element/css/pagination` - styles required for Pagination module
+- `swiper/element/css/parallax` - styles required for Parallax module
+- `swiper/element/css/scrollbar` - styles required for Scrollbar module
+- `swiper/element/css/thumbs` - styles required for Thumbs module
+- `swiper/element/css/virtual` - styles required for Virtual module
+- `swiper/element/css/zoom` - styles required for Zoom module
+
+## Slots
+
+By default all `swiper-container` children are rendered as children of `.swiper-wrapper` element. If you need to add elements before or after there are two slots available:
+
+- `container-start` - will be rendered before `.swiper-wrapper`
+- `container-end` - will be rendered after `.swiper-wrapper`
+
+```html
+<swiper-container>
+  <div slot="container-start">Rendered before wrapper</div>
+  <div slot="container-end">Rendered after wrapper</div>
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+  ...
+</swiper-container>
+```
+
+## Register Parameters
+
+Since 9.1.0 there is a new global `window.SwiperElementRegisterParams` function to register new (or extra) params that are not part of default Swiper parameters. This may be required if you use Swiper element with some custom plugins which extend Swiper parameters.
+
+```js
+// register swiper-container HTMLElement props to be treated as Swiper parameters
+window.SwiperElementRegisterParams(['foo', 'bar']);
+
+const swiperEl = document.querySelector('swiper-container');
+
+Object.assign(swiperEl, {
+  foo: 1,
+  bar: 2,
+});
+
+swiperEl.initialize();
+```
+
+## Usage with React
+
+React doesn't fully supports web components yet (as for version 18). So the usage is basically the same as in HTML:
+
+```jsx
+import { useRef, useEffect } from 'react';
+import { register } from 'swiper/element/bundle';
+
+register();
+
+export const MyComponent = () => {
+  const swiperElRef = useRef(null);
+
+  useEffect(() => {
+    // listen for Swiper events using addEventListener
+    swiperElRef.current.addEventListener('progress', (e) => {
+      const [swiper, progress] = e.detail;
+      console.log(progress);
+    });
+
+    swiperElRef.current.addEventListener('slidechange', (e) => {
+      console.log('slide changed');
+    });
+  }, []);
+
+  return (
+    <swiper-container
+      ref={swiperElRef}
+      slides-per-view="3"
+      navigation="true"
+      pagination="true"
+    >
+      <swiper-slide>Slide 1</swiper-slide>
+      <swiper-slide>Slide 2</swiper-slide>
+      <swiper-slide>Slide 3</swiper-slide>
+      ...
+    </swiper-container>
+  );
+};
+```
+
+## Usage with Vue
+
+Vue has full support for web components, including passing attributes as props and listening for custom events:
+
+```html
+<template>
+  <swiper-container
+    :slides-per-view="3"
+    :space-between="spaceBetween"
+    :centered-slides="true"
+    :pagination="{
+      hideOnClick: true
+    }"
+    :breakpoints="{
+      768: {
+        slidesPerView: 3,
+      },
+    }"
+    @progress="onProgress"
+    @slidechange="onSlideChange"
+  >
+    <swiper-slide>Slide 1</swiper-slide>
+    <swiper-slide>Slide 2</swiper-slide>
+    <swiper-slide>Slide 3</swiper-slide>
+  </swiper-container>
+</template>
+
+<script>
+  import { register } from 'swiper/element/bundle';
+
+  register();
+
+  export default function () {
+    setup() {
+      const spaceBetween = 10;
+      const onProgress = (e) => {
+        const [swiper, progress] = e.detail;
+        console.log(progress)
+      };
+
+      const onSlideChange = (e) => {
+        console.log('slide changed')
+      }
+
+      return {
+        spaceBetween,
+        onProgress,
+        onSlideChange,
+      };
+    }
+  }
+</script>
+```
+
+## Usage with Svelte
+
+Svelte has full support for web components, including passing attributes as props and listening for custom events:
+
+```html
+<script>
+  import { register } from 'swiper/element/bundle';
+
+  register();
+
+  const spaceBetween = 10;
+  const onProgress = (e) => {
+    const [swiper, progress] = e.detail;
+    console.log(progress)
+  };
+  const onSlideChange = (e) => {
+    console.log('slide changed')
+  }
+</script>
+
+<swiper-container
+  slides-per-view={3}
+  space-between={spaceBetween}
+  centered-slides={true}
+  pagination={{
+    hideOnClick: true,
+  }}
+  breakpoints={{
+    768: {
+      slidesPerView: 3,
+    },
+  }}
+  on:progress={onProgress}
+  on:slidechange={onSlideChange}
+>
+  <swiper-slide>Slide 1</swiper-slide>
+  <swiper-slide>Slide 2</swiper-slide>
+  <swiper-slide>Slide 3</swiper-slide>
+</swiper-container>
+```
+
+## Usage with Solid
+
+Solid has full support for web components, including passing attributes as props and listening for custom events:
+
+```jsx
+import { register } from 'swiper/element/bundle';
+
+register();
+
+export default () => {
+  const spaceBetween = 10;
+  const onProgress = (e) => {
+    const [swiper, progress] = e.detail;
+    console.log(progress);
+  };
+  const onSlideChange = (e) => {
+    console.log('slide changed');
+  };
+  return (
+    <swiper-container
+      slides-per-view={1}
+      space-between={spaceBetween}
+      centered-slides={true}
+      pagination={{
+        hideOnClick: true,
+      }}
+      breakpoints={{
+        768: {
+          slidesPerView: 3,
+        },
+      }}
+      onProgress={onProgress}
+      onSlidechange={onSlideChange}
+    >
+      <swiper-slide>Slide 1</swiper-slide>
+      <swiper-slide>Slide 2</swiper-slide>
+      <swiper-slide>Slide 3</swiper-slide>
+    </swiper-container>
+  );
+};
+```
+
+## What next?
+
+As you see it is really easy to integrate Swiper into your website or app. So here are your next steps:
+
+- Go to <a href="../swiper-api/">API Documentation</a> to learn more about all Swiper API and how to control it.
+- Look at available <a href="../demos/" target="_blank">Demos</a>.
+- If you have questions about Swiper ask them in <a href="http://stackoverflow.com" target="_blank">StackOverflow</a> or <a href="https://github.com/nolimits4web/swiper/discussions" target="_blank">Swiper Discussions</a>.
+- Create issue on <a href="https://github.com/nolimits4web/swiper/" target="_blank">GitHub</a> if you found a bug.
+- If you are looking for support, we have a private Discord support chat room for <a href="https://www.patreon.com/swiperjs" target="_blank">Swiper Patrons</a>.
+
+export default function Page({ children }) {
+  const components = {
+    h1: Heading.h1,
+    h2: Heading.h2,
+    h3: Heading.h3,
+    h4: Heading.h4,
+  };
+  return (
+    <MDXProvider components={components}>
+      <WithSidebarLayout meta={meta}>{children}</WithSidebarLayout>
+    </MDXProvider>
+  );
+}
